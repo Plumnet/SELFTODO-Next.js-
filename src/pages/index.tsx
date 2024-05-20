@@ -3,7 +3,6 @@ import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
-
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
@@ -18,42 +17,45 @@ export default function Home() {
     { id: 8, title: "17" },
     { id: 9, title: "18" },
     { id: 10, title: "19" },
-    { id: 10, title: "19" },
-    { id: 10, title: "19" },
-    { id: 10, title: "19" },
-    { id: 10, title: "19" },
-    { id: 10, title: "19" },
-    { id: 10, title: "19" },
   ]);
 
-  // const [todoTitle, setTodoTitle] = useState("");
-  // const [todoId, setTodoId] = useState(todos.length + 1);
+  const [todoTitle, setTodoTitle] = useState("");
+  const [todoId, setTodoId] = useState(todos.length + 1);
 
-  // const handleAddFormChanges = (e) => {
-  //   setTodoTitle(e.target.value);
-  // };
+  const handleAddFormChanges = (e) => {
+    setTodoTitle(e.target.value);
+  };
 
-  // const handleAddTodo = () => {
-  //   //
-  //   setTodos([...todos, { id: todoId, title: todoTitle }]);
-  //   //
-  //   setTodoId(todoId + 1);
-  //   //
-  //   setTodoTitle("");
-  // };
+  const handleAddTodo = () => {
+    //
+    setTodos([...todos, { id: todoId, title: todoTitle }]);
+    //
+    setTodoId(todoId + 1);
+    //
+    setTodoTitle("");
+  };
+
+  const handleDeleteTodo = (targetTodo) => {
+    console.log(targetTodo)
+    setTodos(todos.filter((todo) => todo !== targetTodo))
+  }
 
   return (
     <main>
       <div>
-        <create />
+        <input type="text" value={todoTitle} onChange={handleAddFormChanges} />
+        {/* 問題2. ボタンを押すと、新しいtodoがTodoリストに追加されるようにしよう*/}
+        <button onClick={handleAddTodo}>作成</button>
+        {/* ここまで */}
       </div>
       <ul>
         {todos.map((task) => (
           <li key={task.id}>
             <span>{task.title}</span>
+            <button onClick={() => handleDeleteTodo(task)}>削除</button>
           </li>
         ))}
       </ul>
-    </main >
+    </main>
   );
 }
