@@ -26,29 +26,26 @@ export default function Home() {
     { id: 10, title: "19" },
   ]);
 
-  const [todoTitle, setTodoTitle] = useState("");
-  const [todoId, setTodoId] = useState(todos.length + 1);
+  // const [todoTitle, setTodoTitle] = useState("");
+  // const [todoId, setTodoId] = useState(todos.length + 1);
 
-  const handleAddFormChanges = (e) => {
-    setTodoTitle(e.target.value);
-  };
+  // const handleAddFormChanges = (e) => {
+  //   setTodoTitle(e.target.value);
+  // };
 
-  const handleAddTodo = () => {
-    //
-    setTodos([...todos, { id: todoId, title: todoTitle }]);
-    //
-    setTodoId(todoId + 1);
-    //
-    setTodoTitle("");
-  };
+  // const handleAddTodo = () => {
+  //   //
+  //   setTodos([...todos, { id: todoId, title: todoTitle }]);
+  //   //
+  //   setTodoId(todoId + 1);
+  //   //
+  //   setTodoTitle("");
+  // };
 
   return (
     <main>
       <div>
-        <input type="text" value={todoTitle} onChange={handleAddFormChanges} />
-        {/* 問題2. ボタンを押すと、新しいtodoがTodoリストに追加されるようにしよう*/}
-        <button onClick={handleAddTodo}>作成</button>
-        {/* ここまで */}
+        <create />
       </div>
       <ul>
         {todos.map((task) => (
@@ -57,6 +54,6 @@ export default function Home() {
           </li>
         ))}
       </ul>
-    </main>
+    </main >
   );
 }
