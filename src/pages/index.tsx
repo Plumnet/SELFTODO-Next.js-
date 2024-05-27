@@ -3,6 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
+import Create from "./components/Create";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
@@ -21,8 +22,11 @@ export default function Home() {
 
   const [todoTitle, setTodoTitle] = useState("");
   const [todoId, setTodoId] = useState(todos.length + 1);
+  const [isEditable, setIsEditable] = useState(false)
+  const [editId, setEditId] = useState('')
+  const [newTitle, setNewTitle] = useState('')
 
-  const handleAddFormChanges = (e) => {
+  const handleAddFormChanges = (e: any) => {
     setTodoTitle(e.target.value);
   };
 
@@ -33,12 +37,15 @@ export default function Home() {
     setTodoId(todoId + 1);
     //
     setTodoTitle("");
+    console.log('テスト')
   };
 
-  const handleDeleteTodo = (targetTodo) => {
+  const handleDeleteTodo = (targetTodo: any) => {
     console.log(targetTodo)
     setTodos(todos.filter((todo) => todo !== targetTodo))
   }
+
+
 
   return (
     <main>
@@ -47,6 +54,9 @@ export default function Home() {
         {/* 問題2. ボタンを押すと、新しいtodoがTodoリストに追加されるようにしよう*/}
         <button onClick={handleAddTodo}>作成</button>
         {/* ここまで */}
+      </div>
+      <div>
+        <Create add={handleAddTodo} title={todoTitle} addform={handleAddFormChanges} />
       </div>
       <ul>
         {todos.map((task) => (

@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 
-export default function create() {
-    const [todos, setTodos] = useState([])
+export default function Create({ add, title, addform }: any) {
+
+    const [todos, setTodos] = useState<any>([]);
 
     const [todoTitle, setTodoTitle] = useState("");
     const [todoId, setTodoId] = useState(todos.length + 1);
 
-    const handleAddFormChanges = (e) => {
+    const handleAddFormChanges = (e: any) => {
         setTodoTitle(e.target.value);
     };
 
@@ -17,14 +18,18 @@ export default function create() {
         setTodoId(todoId + 1);
         //
         setTodoTitle("");
+        // console.log(handleAddTodo)
     };
 
     return (
         <div>
-            <input type="text" value={todoTitle} onChange={handleAddFormChanges} />
-            {/* 問題2. ボタンを押すと、新しいtodoがTodoリストに追加されるようにしよう*/}
-            <button onClick={handleAddTodo}>作成</button>
-            {/* ここまで */}
+            <div>
+                <input type="text" value={title} onChange={addform} />
+                {/* 問題2. ボタンを押すと、新しいtodoがTodoリストに追加されるようにしよう*/}
+                <button onClick={add}>作成</button>
+                <button onClick={add}>テスト</button>
+                {/* ここまで */}
+            </div>
         </div>
     )
 }
