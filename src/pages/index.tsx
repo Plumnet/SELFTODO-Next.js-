@@ -99,7 +99,7 @@ export default function Home() {
             value={todoTitle}
             onChange={handleAddFormChanges}
           />
-          <button onClick={handleAddTodo}>作成</button>
+          <Create add={handleAddTodo} title={todoTitle} addform={handleAddFormChanges} />
         </div>
       )}
       <ul>
