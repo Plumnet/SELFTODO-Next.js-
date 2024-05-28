@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import Create from "./components/Create";
+import Delete from "./components/Delete";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
@@ -45,27 +46,72 @@ export default function Home() {
     setTodos(todos.filter((todo) => todo !== targetTodo))
   }
 
+  const handleOpenEditForm = (todo: any) => {
+    setIsEditable(true)
+    setEditId(todo.id)
+    setNewTitle(todo.title)
+  }
+
+  const handleEditFormChange = (e: any) => {
+    setNewTitle(e.target.value)
+  }
+
+  const handleCloseEditForm = () => {
+    setIsEditable(false)
+    setEditId('')
+  }
+
+  const handleEditTodo = (todo: any) => {
+    // 問題2. 編集内容をTodoリストの配列に加えよう
+    //ここまで
+    const newArray = todos.map((todo) =>
+      todo.id === editId ? { ...todo, title: newTitle } : todo
+    )
+    setTodos(newArray)
+    setEditId('')
+    // 問題3. Todoリストの更新後にstateを初期化しよう
+    setNewTitle('')
+    handleCloseEditForm('')
+    // ここまで
+  }
 
 
   return (
-    <main>
-      <div>
-        <input type="text" value={todoTitle} onChange={handleAddFormChanges} />
-        {/* 問題2. ボタンを押すと、新しいtodoがTodoリストに追加されるようにしよう*/}
-        <button onClick={handleAddTodo}>作成</button>
-        {/* ここまで */}
-      </div>
-      <div>
-        <Create add={handleAddTodo} title={todoTitle} addform={handleAddFormChanges} />
-      </div>
+    <>
+      {isEditable ? (
+        <div>
+          <input
+            type="text"
+            label="新しいタイトル"
+            value={newTitle}
+            onChange={handleEditFormChange}
+          />
+          {/* 問題1. 編集ボタンを押すと関数が実行されるようにしよう*/}
+          <button onClick={handleEditTodo}>編集を保存</button>
+          {/* ここまで */}
+          <button onClick={handleCloseEditForm}>キャンセル</button>
+        </div>
+      ) : (
+        <div>
+          <input
+            type="text"
+            label="タイトル"
+            value={todoTitle}
+            onChange={handleAddFormChanges}
+          />
+          <button onClick={handleAddTodo}>作成</button>
+        </div>
+      )}
       <ul>
-        {todos.map((task) => (
-          <li key={task.id}>
-            <span>{task.title}</span>
-            <button onClick={() => handleDeleteTodo(task)}>削除</button>
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            <span>{todo.title}</span>
+            <button onClick={() => handleOpenEditForm(todo)}>編集</button>
+            <button onClick={() => handleDeleteTodo(todo)}>削除</button>
+            <Delete handleDelete={handleDeleteTodo} todo={todo} />
           </li>
         ))}
       </ul>
-    </main>
-  );
+    </>
+  )
 }
