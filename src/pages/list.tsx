@@ -105,7 +105,9 @@ export default function Home() {
                 {todos.map((todo) => (
                     <li key={todo.id}>
                         <span>{todo.title}</span>
-                        <button onClick={() => handleOpenEditForm(todo)}>編集</button>
+                        <a href="/hensyuu">
+                            <button onClick={() => handleOpenEditForm(todo)}>編集</button>
+                        </a>
                         <ul>
                             <Edit OpenEditForm={handleOpenEditForm} todo={todo} />
                         </ul>
