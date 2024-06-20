@@ -1,3 +1,4 @@
+import { Button, Input } from '@chakra-ui/react';
 import React, { useState } from 'react'
 
 export default function Create({ add, title, addform }: any) {
@@ -24,10 +25,9 @@ export default function Create({ add, title, addform }: any) {
     return (
         <div>
             <div>
-                <input type="text" value={title} onChange={addform} />
+                <Input type="text" value={title} onChange={addform} width="300px" />
                 {/* 問題2. ボタンを押すと、新しいtodoがTodoリストに追加されるようにしよう*/}
-                <button onClick={add}>作成</button>
-                <button onClick={add}>テスト</button>
+                <Button colorScheme='teal' size='md' onClick={add}>作成</Button>
                 {/* ここまで */}
             </div>
         </div>

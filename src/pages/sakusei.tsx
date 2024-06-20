@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Create from './components/Create'
 import { Link } from 'react-router-dom';
+import { Box, ChakraProvider, Text } from '@chakra-ui/react';
 
 export default function sakusei() {
     type Todo = {
@@ -25,11 +26,22 @@ export default function sakusei() {
         setTodoTitle(e.target.value);
     };
 
+    const innerBoxStyles = {
+        p: '5',
+        backgroundImage:
+            'url(http://rynona.sakura.ne.jp/sblo_files/rygames/image/Ws001282_-thumbnail2.png) ',
+    }
+
     return (
-        <div>
-            TEST
-            <Create add={handleAddTodo} title={todoTitle} addform={handleAddFormChanges} />
-            {/* {todos.map((todo) => (
+        <ChakraProvider>
+            <div>
+                <Box sx={innerBoxStyles}>
+                    <Text fontSize={32} color='Yellow' textAlign={['left']}>
+                        作成画面
+                    </Text>
+                </Box>
+                <Create add={handleAddTodo} title={todoTitle} addform={handleAddFormChanges} />
+                {/* {todos.map((todo) => (
                 <p>
                     <Link
                         href={{
@@ -44,6 +56,7 @@ export default function sakusei() {
                     </Link>
                 </p>
             ))} */}
-        </div>
+            </div>
+        </ChakraProvider>
     )
 }

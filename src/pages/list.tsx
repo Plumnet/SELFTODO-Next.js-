@@ -10,7 +10,9 @@ import Edit from './components/Edit';
 import EditForm from './components/EditForm';
 import Router from 'next/router';
 import Link from 'next/link';
+import { Box, Button, ButtonGroup, ChakraProvider, Text } from '@chakra-ui/react';
 const inter = Inter({ subsets: ["latin"] });
+
 
 export default function Home() {
     const [todos, setTodos] = useState([
@@ -91,33 +93,49 @@ export default function Home() {
         // ここまで
     }
 
+    const innerBoxStyles = {
+        p: '5',
+        backgroundImage:
+            'url(https://dynabook.com/assistpc/faq/pcdata2/images2/017385a.gif) ',
+    }
+
 
     return (
         <>
-            <a href="/sakusei">
-                <button>
-                    タスク作成
-                </button>
-            </a>
+            <ChakraProvider>
+                <Box sx={innerBoxStyles}>
+                    <Text fontSize={32} color='Green' textAlign={['left']}>
+                        一覧画面
+                    </Text>
+                </Box>
+                <a href="/sakusei">
+                    <Button colorScheme='red' size='sm'>
+                        タスク作成
+                    </Button>
+                </a>
 
-            {/* <Link href={"/sakusei"}>作成画面へ</Link> */}
-            <ul>
-                {todos.map((todo) => (
-                    <li key={todo.id}>
-                        <span>{todo.title}</span>
-                        <a href="/hensyuu">
-                            <button onClick={() => handleOpenEditForm(todo)}>編集</button>
-                        </a>
-                        <ul>
-                            <Edit OpenEditForm={handleOpenEditForm} todo={todo} />
-                        </ul>
-                        {/* <button onClick={() => handleDeleteTodo(todo)}>削除</button> */}
-                        <Delete handleDelete={handleDeleteTodo} todo={todo} />
-                    </li>
-                ))}
-            </ul>
-            {/* <h1>{Router.query.name}</h1>
+                {/* <Link href={"/sakusei"}>作成画面へ</Link> */}
+                <ul>
+                    {todos.map((todo) => (
+                        <li key={todo.id}>
+                            <Link href="list/syousai[id]">
+                                <span>{todo.title}</span>
+                            </Link>
+                            <a href="/hensyuu">
+                                <Button colorScheme='teal' size='sm' onClick={() => handleOpenEditForm(todo)}>編集</Button>
+                            </a>
+                            < Delete handleDelete={handleDeleteTodo} todo={todo} />
+                            <ul>
+                                {/* <Edit OpenEditForm={handleOpenEditForm} todo={todo} /> */}
+                            </ul>
+                            {/* <button onClick={() => handleDeleteTodo(todo)}>削除</button> */}
+                            {/* < Delete handleDelete={handleDeleteTodo} todo={todo} /> */}
+                        </li>
+                    ))}
+                </ul >
+                {/* <h1>{Router.query.name}</h1>
             <p>{`値: ${Router.query.proficiency}`}</p> */}
+            </ChakraProvider>
         </>
     )
 }

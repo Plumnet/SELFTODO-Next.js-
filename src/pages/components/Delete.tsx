@@ -1,9 +1,10 @@
+import { Button } from '@chakra-ui/react'
 import React from 'react'
 
 function Delete({ handleDelete, todo }: any) {
 
     return (
-        <button onClick={() => handleDelete(todo)}>削除</button>
+        <Button colorScheme='teal' variant='outline' size='sm' onClick={() => handleDelete(todo)}>削除</Button>
     )
 }
 
