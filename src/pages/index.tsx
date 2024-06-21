@@ -1,19 +1,22 @@
 import { Box, Button, ChakraProvider, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
-import db from "../firebase";
-import { QuerySnapshot, collection, getDocs } from "firebase/firestore";
+// import db from "@/lib/firebase/firebase";
+import { QuerySnapshot, collection, getDocs, query, where } from "firebase/firestore";
+import db from '@/firebase';
+
 
 export default function index() {
   const [posts, setPosts] = useState([]);
+  const [todoTitle, setTotoTitle] = useState([]);
 
-  useEffect(() => {
-    //データベースからデータを取得する
-    const postData = collection(db, "posts");
-    getDocs(postData).then((snapShot) => {
-      console.log(snapShot.docs.map((doc) => doc))
-    })
-  }, []);
+
+  const col = collection(db, "tasks");
+  const q = query(col, where("id", "==", todoTitle));
+  const task = getDocs(q).then((snapshot) => {
+    return snapshot.docs[0].data();
+  });
+
 
 
 
