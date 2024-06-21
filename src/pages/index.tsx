@@ -11,7 +11,7 @@ export default function index() {
   const [todoTitle, setTotoTitle] = useState([]);
 
 
-  const col = collection(db, "tasks");
+  const col = collection(db, "todo");
   const q = query(col, where("id", "==", todoTitle));
   const task = getDocs(q).then((snapshot) => {
     return snapshot.docs[0].data();
