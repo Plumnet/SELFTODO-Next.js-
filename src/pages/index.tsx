@@ -8,15 +8,27 @@ import db from '@/firebase';
 
 export default function index() {
   const [posts, setPosts] = useState([]);
-  const [todoTitle, setTotoTitle] = useState([]);
+  const [taskId, setTaskId] = useState([]);
 
+  // async function todo() {
+  //   const col = collection(db, "todo");
+  //   const q = query(col, where("id", "==", 1));
+  //   const task: any = await getDocs(q).then((snapshot) => {
+  //     return snapshot.docs[0].data();
+  //   });
+  //   console.log(task)
+  // }
 
-  const col = collection(db, "todo");
-  const q = query(col, where("id", "==", todoTitle));
-  const task = getDocs(q).then((snapshot) => {
-    return snapshot.docs[0].data();
-  });
+  async function todo() {
+    const tasks = await getDocs(collection(db, "todo")).then((snapshot) =>
+      snapshot.docs.map((doc) => {
+        return doc.data();
+      })
+    );
+    console.log(tasks)
+  }
 
+  todo()
 
 
 
