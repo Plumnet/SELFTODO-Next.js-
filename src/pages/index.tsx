@@ -2,17 +2,20 @@ import { Box, Button, ChakraProvider, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 // import db from "@/lib/firebase/firebase";
-import { QuerySnapshot, collection, getDocs, query, where } from "firebase/firestore";
+import { QuerySnapshot, collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
 import db from '@/firebase';
 
 
 export default function index() {
   const [posts, setPosts] = useState([]);
-  const [taskId, setTaskId] = useState([]);
+
+  const initialState = ['id: 1', 'id: 2'];
+
+  const [taskId, setTaskId] = useState(initialState);
 
   // async function todo() {
   //   const col = collection(db, "todo");
-  //   const q = query(col, where("id", "==", 1));
+  //   const q = query(col, where("id", "==", taskId));
   //   const task: any = await getDocs(q).then((snapshot) => {
   //     return snapshot.docs[0].data();
   //   });
@@ -32,6 +35,7 @@ export default function index() {
 
 
 
+
   const innerBoxStyles = {
     // boxSize: '150px',
     p: '5',
@@ -48,6 +52,7 @@ export default function index() {
           <Text fontSize={32} color='RED' textAlign={['left']}>
             ホーム画面
           </Text>
+          doc.data()
         </Box>
         <Flex align="center" justify="center" padding={200}>
           <Link href={"/list"}>
@@ -56,6 +61,10 @@ export default function index() {
             </Text>
           </Link>
         </Flex>
+        //https://future-architect.github.io/articles/20200819/参考記事
+          tasks.map((task, index) => {
+            return <p key={index}> {task.name}</p>
+        )}
       </ChakraProvider>
     </div >
   )
