@@ -2,7 +2,7 @@ import { Box, Button, ChakraProvider, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 // import db from "@/lib/firebase/firebase";
-import { QuerySnapshot, collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { QuerySnapshot, doc, getDocs, query, setDoc, where } from "firebase/firestore";
 import db from '@/firebase';
 
 
@@ -13,6 +13,8 @@ export default function index() {
 
   const [taskId, setTaskId] = useState(initialState);
 
+  const [messages, setMessages] = useState([])
+
   // async function todo() {
   //   const col = collection(db, "todo");
   //   const q = query(col, where("id", "==", taskId));
@@ -22,16 +24,26 @@ export default function index() {
   //   console.log(task)
   // }
 
-  async function todo() {
-    const tasks = await getDocs(collection(db, "todo")).then((snapshot) =>
-      snapshot.docs.map((doc) => {
-        return doc.data();
-      })
-    );
-    console.log(tasks)
-  }
+  // async function todo() {
+  //   const tasks = await getDocs(collection(db, "todo")).then((snapshot) =>
+  //     snapshot.docs.map((doc) => {
+  //       return doc.data();
+  //     })
+  //   );
+  //   console.log(tasks)
+  // }
 
-  todo()
+  // todo()
+
+  //ReactでLINEクローンの作り方 - React×Firebaseチュートリ//ReactでLINEクローンの作り方 - React×Firebaseチュートリアルの34分以降
+  useEffect(() => {
+    //何故かcollectionが'Firestore' に存在しません。と出てくる
+    db.collection("todo")
+      .limit(50)
+      .onSnapshot((snapshot: any) => {
+        setMessages(snapshot.docs.map((doc: any) => doc.data()))
+      })
+  }, []);
 
 
 
@@ -48,7 +60,7 @@ export default function index() {
   return (
     <div>
       <ChakraProvider>
-        <Box sx={innerBoxStyles}>
+        {/* <Box sx={innerBoxStyles}>
           <Text fontSize={32} color='RED' textAlign={['left']}>
             ホーム画面
           </Text>
@@ -60,19 +72,31 @@ export default function index() {
               一覧画面へ
             </Text>
           </Link>
-        </Flex>
-        //https://qiita.com/masakiwakabayashi/items/8d33f6df1a7ec4dbfa3a/参考記事
-        {
-          // map関数を使ってstaffのデータを表示
-          tasks.map((task: any) => {
-            return (
-              <Box key={task.id}>
-                <Flex>
-                  <Box p={3} minWidth={'73px'}>
-                    {task.name}
-                  </Box>
-                </ChakraProvider>
+        </Flex> */}
+        <div className="msgs">
+          //ここでエラーになる
+          {messages.map(({ id, text, photoURL, uid }) => {
+            <div>
+              <div key={id}>
+                <img src={photoURL} alt="" />
+                <p>{text}</p>
               </div>
-            )
-          }
-        }
+            </div>
+          })}
+        </div>
+      </ChakraProvider>
+        //https://qiita.com/masakiwakabayashi/items/8d33f6df1a7ec4dbfa3a/参考記事
+      {/* {
+            // map関数を使ってstaffのデータを表示
+            tasks.map((task: any) => {
+              return (
+                <Box key={task.id}>
+                  <Flex>
+                    <Box p={3} minWidth={'73px'}>
+                      {task.name}
+                    </Box>
+                  </ChakraProvider>
+                </div>
+              )
+            }
+        } */}
