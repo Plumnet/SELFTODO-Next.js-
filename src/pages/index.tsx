@@ -61,11 +61,18 @@ export default function index() {
             </Text>
           </Link>
         </Flex>
-        //https://future-architect.github.io/articles/20200819/参考記事
-          tasks.map((task, index) => {
-            return <p key={index}> {task.name}</p>
-        )}
-      </ChakraProvider>
-    </div >
-  )
-}
+        //https://qiita.com/masakiwakabayashi/items/8d33f6df1a7ec4dbfa3a/参考記事
+        {
+          // map関数を使ってstaffのデータを表示
+          tasks.map((task: any) => {
+            return (
+              <Box key={task.id}>
+                <Flex>
+                  <Box p={3} minWidth={'73px'}>
+                    {task.name}
+                  </Box>
+                </ChakraProvider>
+              </div>
+            )
+          }
+        }
