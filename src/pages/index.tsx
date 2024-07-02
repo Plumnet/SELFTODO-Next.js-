@@ -26,9 +26,11 @@ export default function index() {
       })
     );
     console.log(tasks)
+    setPosts(tasks as any)
   }
 
   todo()
+  console.log('post', posts)
 
 
 
@@ -56,6 +58,11 @@ export default function index() {
             </Text>
           </Link>
         </Flex>
+        <Box>
+          {posts.map((task: any) => (
+            <p> {task.text}</p>
+          ))}
+        </Box>
       </ChakraProvider>
     </div >
   )
