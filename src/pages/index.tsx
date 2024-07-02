@@ -5,61 +5,47 @@ import React, { useEffect, useState } from 'react'
 import { QuerySnapshot, collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
 import db from '@/firebase';
 
+
 export default function index() {
   const [posts, setPosts] = useState([]);
   const initialState = ['id: 1', 'id: 2'];
-  const [taskId, setTaskId] = useState(initialState);
+  const [todoId, setTodoId] = useState([]);//←配列は、これではいけませんか？
 
-  //ReactでLINEクローンの作り方 - React×Firebaseチュートリ//ReactでLINEクローンの作り方 - React×Firebaseチュートリアルの38:20の時点のコード
-  function Line() {
-    const [messages, setMessages] = useState([]);
-    useEffect(() => {
-      //エラー発生箇所、"プロパティ 'collection' は型 'Firestore' に存在しません。"
-      db.collection("messages")
-        .limit(50)
-        .onSnapshot((snapshot: any) => {
-          setMessages(snapshot.docs.map((doc: any) => doc.data()))
-        })
-    }, []);
-
-
-    return (
-      <div>
-        //エラー発生箇所、"型 'void' を型 'ReactNode' に割り当てることはできません。"
-        {console.log(messages)}
-        <div className="msgs">
-          {messages.map(({ id, text }))}
-          <div key={id}>
-            <p>{text}</p>
-          </div>
-        </div>
-      </div>
-    )
+  //https://zenn.dev/kiwichan101kg/articles/ee5460b61bce25の条件付きデータの取得より、Cannot read properties of undefined (reading 'data')エラーになってしまいます。
+  async function todo() {
+    const col = collection(db, "todo");
+    const q = query(col, where("id", "==", todoId));
+    const todo = await getDocs(q).then((snapshot) => {
+      return snapshot.docs[0].data();
+    });
+    console.log(todo)
   }
-  // <div>
-  //   <ChakraProvider>
-  //     <Box sx={innerBoxStyles}>
-  //       <Text fontSize={32} color='RED' textAlign={['left']}>
-  //         ホーム画面
-  //       </Text>
 
-  //     </Box>
-  //     <Flex align="center" justify="center" padding={200}>
-  //       <Link href={"/list"}>
-  //         <Text fontSize={32}>
-  //           一覧画面へ
-  //         </Text>
-  //       </Link>
-  //     </Flex>
-  //   //https://qiita.com/masakiwakabayashi/items/8d33f6df1a7ec4dbfa3a/参考記事
-  //     <div className="msgs">
-  //       {messages.map(({ id, text }) => (
-  //         <div>
-  //           <div key={id}>
-  //             <p>{text}</p>
-  //           </div>
-  //         </div>
-  //       ))}
-  //     </div>
+  todo()
 
+  const innerBoxStyles = {
+    // boxSize: '150px',
+    p: '5',
+    backgroundImage:
+      'url(https://livedoor.blogimg.jp/zeropasoakita/imgs/e/5/e555c3b1-s.jpg) ',
+  }
+
+  return (
+    <div>
+      <ChakraProvider>
+        <Box sx={innerBoxStyles}>
+          <Text fontSize={32} color='RED' textAlign={['left']}>
+            ホーム画面
+          </Text>
+        </Box>
+        <Flex align="center" justify="center" padding={200}>
+          <Link href={"/list"}>
+            <Text fontSize={32}>
+              一覧画面へ
+            </Text>
+          </Link>
+        </Flex>
+      </ChakraProvider>
+    </div >
+  )
 }
