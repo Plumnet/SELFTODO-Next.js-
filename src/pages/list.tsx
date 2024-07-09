@@ -155,7 +155,7 @@ export default function Home() {
                                 <Link href="list/syousai[id]">
                                     <span>{todo.title}</span>
                                 </Link>
-                                <a href="/hensyuu" marigin='10px'>
+                                <a href="/hensyuu">
                                     <Button colorScheme='teal' size='sm' m={2} onClick={() => handleOpenEditForm(todo)}>編集</Button>
                                 </a>
                                 < Delete handleDelete={handleDeleteTodo} todo={todo} />
