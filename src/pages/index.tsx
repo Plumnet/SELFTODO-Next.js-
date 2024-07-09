@@ -7,8 +7,6 @@ import db from '@/firebase';
 
 
 export default function index() {
-  //firestoreのデータ保持用のstate
-  const [posts, setPosts] = useState([]);
   //現在、未使用
   const [taskId, setTaskId] = useState([]);
 
@@ -20,33 +18,6 @@ export default function index() {
   //   });
   //   console.log(task)
   // }
-
-  //非同期関数、定義の方で、awaitが代入されているので、
-  //これを使わないと、コンパイルエラーになってしまう。
-  async function todo() {
-    //クエリを実行し、結果をQuerySnapshotとして返す。DocumentReferenceを参照している。
-    const tasks = await getDocs(collection(db, "todo")).then((snapshot) =>
-      //docsは配列を示している、その中身がQueryDocumentSnapshot。
-      snapshot.docs.map((doc) => {
-        console.log('doc', doc.data())
-        //https://qiita.com/maiyama18/items/86a4573fdce800221b72の解説より
-        //データを抽出し、特定のフィールドを取得。
-        return doc.data();
-      })
-    );
-    //tasksがデータが取得出来ているかの確認
-    console.log('task', tasks)
-    //stateのデータをtasksに更新
-    setPosts(tasks as any)
-  }
-  //todo関数を呼び出す
-  useEffect(() => {
-    todo()
-  }, []);
-  // todo()
-  //こちらのログは、画面上でpostと表示される
-  //40行目と同じ内容ではある
-  console.log('post', posts)
 
 
   //画像の制御
@@ -80,11 +51,6 @@ export default function index() {
             </Text>
           </Link>
         </Flex>
-        <Box>
-          {posts.map((task: any) => (
-            <p> {task.text}</p>
-          ))}
-        </Box>
       </ChakraProvider>
     </>
   )
