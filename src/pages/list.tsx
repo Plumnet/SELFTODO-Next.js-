@@ -1,103 +1,32 @@
 import React, { useEffect, useState } from 'react'
-import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "next/font/google";
-import styles from "@/styles/Home.module.css";
-import Create2 from './components/Create2';
 import Delete from './components/Delete';
-import Create from './components/Create';
-import Edit from './components/Edit';
-import EditForm from './components/EditForm';
-import Router from 'next/router';
 import Link from 'next/link';
-import { Box, Button, ButtonGroup, ChakraProvider, Flex, Text } from '@chakra-ui/react';
+import { Box, Button, ChakraProvider, Text } from '@chakra-ui/react';
 import { collection, getDocs } from 'firebase/firestore';
 import db from '@/firebase';
-const inter = Inter({ subsets: ["latin"] });
 
-
+//コンポーネントを他のファイルから参照できるようにする
 export default function Home() {
-    const [todos, setTodos] = useState([
-        // { id: 1, title: "姉に誕生日プレゼントを買う" },
-        // { id: 2, title: "論文提出" },
-        // { id: 3, title: "市役所に住民票の写しをもらいに行く" },
-        // { id: 4, title: "12345" },
-        // { id: 5, title: "678910" },
-        // { id: 6, title: "11,12,13,14,15" },
-        // { id: 7, title: "16" },
-        // { id: 8, title: "17" },
-        // { id: 9, title: "18" },
-        // { id: 10, title: "19" },
-        // { id: 10, title: "19" },
-        // { id: 10, title: "19" },
-        // { id: 10, title: "19" },
-        // { id: 10, title: "19" },
-        // { id: 10, title: "19" },
-        // { id: 10, title: "19" },
-    ]);
+    //オブジェクトの各要素の型指定
+    type Todo = {
+        id: number;
+        title: string;
+    };
 
-    //todoTitleはtodosの中に含まれている
-    const [todoTitle, setTodoTitle] = useState("");
-
-    //todoIdはtodosの中に含まれている
-    const [todoId, setTodoId] = useState(todos.length + 1);
-
-    const [isEditable, setIsEditable] = useState(false)
-    const [editId, setEditId] = useState('')
-    const [newTitle, setNewTitle] = useState('')
+    //オブジェクトの配列の型を指定
+    const [todos, setTodos] = useState<Todo[]>([]);
 
     //firestoreのデータ保持用のstate
     const [posts, setPosts] = useState([]);
 
-    const handleAddFormChanges = (e: any) => {
-        setTodoTitle(e.target.value);
-    };
-
-    const handleAddTodo = () => {
-        //
-        setTodos([...todos, { id: todoId, title: todoTitle }]);
-        //
-        setTodoId(todoId + 1);
-        //
-        setTodoTitle("");
-    };
-
+    //クリックイベント用の削除のための関数
+    //targetTodoとtodoで一致していない値を除外する
     const handleDeleteTodo = (targetTodo: any) => {
-        console.log(targetTodo)
+        console.log('targetTodo', targetTodo)
         setTodos(todos.filter((todo) => todo !== targetTodo))
     }
 
-    const handleOpenEditForm = (todo: any) => {
-        setIsEditable(true)
-        setEditId(todo.id)
-        // console.log(todo.id)
-        setNewTitle(todo.title)
-    }
-
-    const handleEditFormChange = (e: any) => {
-        setNewTitle(e.target.value)
-    }
-
-    const handleCloseEditForm = () => {
-        setIsEditable(false)
-        setEditId('')
-        console.log(editId)
-    }
-
-    const handleEditTodo = () => {
-        // 問題2. 編集内容をTodoリストの配列に加えよう
-        //ここまで
-        const newArray = todos.map((todo) =>
-            todo.id === editId ? { ...todo, title: newTitle } : todo
-        )
-        setTodos(newArray)
-        setEditId('')
-        // 問題3. Todoリストの更新後にstateを初期化しよう
-        setNewTitle('')
-        handleCloseEditForm()
-        // ここまで
-    }
-
+    //画像の制御
     const innerBoxStyles = {
         p: '5',
         backgroundImage:
@@ -111,9 +40,10 @@ export default function Home() {
         const tasks = await getDocs(collection(db, "todo")).then((snapshot) =>
             //docsは配列を示している、その中身がQueryDocumentSnapshot。
             snapshot.docs.map((doc) => {
+                //ドキュメントのデータが取得できているかの確認
                 console.log('doc', doc.data())
                 //https://qiita.com/maiyama18/items/86a4573fdce800221b72の解説より
-                //データを抽出し、特定のフィールドを取得。
+                //ドキュメントのデータを返す。
                 return doc.data();
             })
         );
@@ -131,15 +61,19 @@ export default function Home() {
     //40行目と同じ内容ではある
     console.log('post', posts)
 
-
+    //表示部分
     return (
-        <>
-            <ChakraProvider>
+        //ChakraUIを使用するのに、不可欠      
+        <ChakraProvider>
+        //1つの要素でしか、返却できないので不可欠
+            <>
+                {/* 見出し部分の表示領域 */}
                 <Box sx={innerBoxStyles}>
                     <Text fontSize={32} color='Green' textAlign={['left']}>
                         一覧画面
                     </Text>
                 </Box>
+                {/* 作成ボタンの表示領域*/}
                 <Box m={4}>
                     <a href="/sakusei">
                         <Button colorScheme='red' size='sm'>
@@ -147,30 +81,28 @@ export default function Home() {
                         </Button>
                     </a>
                 </Box>
-                {/* <Link href={"/sakusei"}>作成画面へ</Link> */}
+                {/* タスク項目、編集ボタン、削除ボタンの表示領域*/}
                 <Box m={8}>
                     <ul>
+                        {/* todosの結果を配列として返す */}
                         {todos.map((todo) => (
-                            <li key={todo.id}>
+                            < li key={todo.id} >
+                                {/* 動的ルーティング 、idに対応した詳細画面へ遷移させる */}
                                 <Link href="list/syousai[id]">
+                                    {/* インライン要素で表示する */}
                                     <span>{todo.title}</span>
                                 </Link>
+                                {/* 編集画面へ遷移させる */}
                                 <a href="/hensyuu">
-                                    <Button colorScheme='teal' size='sm' m={2} onClick={() => handleOpenEditForm(todo)}>編集</Button>
+                                    <Button colorScheme='teal' size='sm' m={2}>編集</Button>
                                 </a>
-                                < Delete handleDelete={handleDeleteTodo} todo={todo} />
-                                <ul>
-                                    {/* <Edit OpenEditForm={handleOpenEditForm} todo={todo} /> */}
-                                </ul>
-                                {/* <button onClick={() => handleDeleteTodo(todo)}>削除</button> */}
-                                {/* < Delete handleDelete={handleDeleteTodo} todo={todo} /> */}
+                                {/* handleDeleteはonClick、todoはhandleDeleteの引数 */}
+                                <Delete handleDelete={handleDeleteTodo} todo={todo} />
                             </li>
                         ))}
                     </ul >
                 </Box>
-                {/* <h1>{Router.query.name}</h1>
-            <p>{`値: ${Router.query.proficiency}`}</p> */}
-            </ChakraProvider >
-        </>
+            </>
+        </ChakraProvider>
     )
 }
