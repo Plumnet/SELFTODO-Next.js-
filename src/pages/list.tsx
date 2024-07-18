@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Box, Button, ChakraProvider, Text } from '@chakra-ui/react';
 import { collection, getDocs } from 'firebase/firestore';
 import db from '@/firebase';
+import CreateHyozi from './components/CreateHyozi';
 
 //コンポーネントを他のファイルから参照できるようにする
 export default function Home() {
@@ -98,6 +99,7 @@ export default function Home() {
                                 </a>
                                 {/* handleDeleteはonClick、todoはhandleDeleteの引数 */}
                                 <Delete handleDelete={handleDeleteTodo} todo={todo} />
+                                <CreateHyozi map={todo} />
                             </li>
                         ))}
                     </ul >

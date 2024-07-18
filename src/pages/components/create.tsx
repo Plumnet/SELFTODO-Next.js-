@@ -1,5 +1,8 @@
-import { Button, Input } from '@chakra-ui/react';
+import db from '@/firebase';
+import { Box, Button, Input } from '@chakra-ui/react';
+import { doc, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react'
+import CreateHyozi from './CreateHyozi';
 
 export default function Create({ add, title, addform }: any) {
 
@@ -8,19 +11,9 @@ export default function Create({ add, title, addform }: any) {
     const [todoTitle, setTodoTitle] = useState("");
     const [todoId, setTodoId] = useState(todos.length + 1);
 
-    const handleAddFormChanges = (e: any) => {
-        setTodoTitle(e.target.value);
-    };
 
-    const handleAddTodo = () => {
-        //
-        setTodos([...todos, { id: todoId, title: todoTitle }]);
-        //
-        setTodoId(todoId + 1);
-        //
-        setTodoTitle("");
-        // console.log(handleAddTodo)
-    };
+
+
 
     return (
         <div>
@@ -30,7 +23,7 @@ export default function Create({ add, title, addform }: any) {
                 <Button colorScheme='teal' size='md' onClick={add}>作成</Button>
                 {/* ここまで */}
             </div>
-        </div>
+        </div >
     )
 }
 

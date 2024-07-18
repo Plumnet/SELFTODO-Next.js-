@@ -3,7 +3,8 @@ import Create from './components/Create'
 import { Link } from 'react-router-dom';
 import { Box, ChakraProvider, Text } from '@chakra-ui/react';
 import db from '@/firebase';
-import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
+import CreateHyozi from './components/CreateHyozi';
 
 
 //コンポーネントを他のファイルから参照できるようにする
@@ -31,7 +32,7 @@ export default function sakusei(todo: any) {
         setTodoTitle("");
         //Titleが空になっているかの確認
         console.log(todoTitle)
-        await addDoc(collection(db, "todo"), { id: todoId, titile: todoTitle })
+        await setDoc(doc(db, "todo", todoId.toString()), { id: todoId, titile: todoTitle })
     };
 
     //チェンジイベント用の追加のための関数
@@ -46,6 +47,12 @@ export default function sakusei(todo: any) {
             'url(http://rynona.sakura.ne.jp/sblo_files/rygames/image/Ws001282_-thumbnail2.png) ',
     }
 
+
+    const docData = {
+        id: todo.id,
+        title: todo.title,
+        text: todo.text,
+    };
 
     async function newTodo(todo: any) {
         await setDoc(doc(db, "todo", '3'), { id: 3, titile: 10, text: 20 })
@@ -67,23 +74,9 @@ export default function sakusei(todo: any) {
                 </Box>
                 {/* addはonClick、titleは入力フォームの値、addformはonChange */}
                 <Create add={handleAddTodo} title={todoTitle} addform={handleAddFormChanges} />
-                {/* {todos.map((todo) => (
-                <p>
-                    <Link
-                        href={{
-                            pathname: `/list/${todo.id}`,
-                            query: {
-                                id: todo.id,
-                                title: todo.title,
-                            },
-                        }}
-                    >
-                        {todo.title}
-                    </Link>
-                </p>
-            ))} */}
+                <CreateHyozi map={todo} />
                 <button onClick={() => newTodo(todo)}>ボタン</button>
             </div>
-        </ChakraProvider>
+        </ChakraProvider >
     )
 }
