@@ -66,7 +66,6 @@ export default function Home() {
     return (
         //ChakraUIを使用するのに、不可欠      
         <ChakraProvider>
-        //1つの要素でしか、返却できないので不可欠
             <>
                 {/* 見出し部分の表示領域 */}
                 <Box sx={innerBoxStyles}>
@@ -87,7 +86,7 @@ export default function Home() {
                     <ul>
                         {/* todosの結果を配列として返す */}
                         {todos.map((todo) => (
-                            < li key={todo.id} >
+                            <li key={todo.id} >
                                 {/* 動的ルーティング 、idに対応した詳細画面へ遷移させる */}
                                 <Link href="list/syousai[id]">
                                     {/* インライン要素で表示する */}
@@ -99,7 +98,6 @@ export default function Home() {
                                 </a>
                                 {/* handleDeleteはonClick、todoはhandleDeleteの引数 */}
                                 <Delete handleDelete={handleDeleteTodo} todo={todo} />
-                                <CreateHyozi map={todo} />
                             </li>
                         ))}
                     </ul >

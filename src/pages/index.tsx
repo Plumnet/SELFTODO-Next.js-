@@ -7,6 +7,8 @@ import db from '@/firebase';
 
 
 export default function index() {
+
+
   //現在、未使用
   const [taskId, setTaskId] = useState([]);
 
@@ -27,6 +29,8 @@ export default function index() {
     backgroundImage:
       'url(https://livedoor.blogimg.jp/zeropasoakita/imgs/e/5/e555c3b1-s.jpg) ',
   }
+
+
 
 
   //表示部分

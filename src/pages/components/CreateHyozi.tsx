@@ -4,6 +4,10 @@ import React, { useState } from 'react'
 export default function CreateHyozi({ map }: any) {
     //Stateにはオブジェクトの型を指定
     const [todos, setTodos] = useState<Todo[]>([])
+    //新規登録のための、IdのState
+    const [todoId, setTodoId] = useState(todos.length + 1);
+    //新規登録のための、TitleのState
+    const [todoTitle, setTodoTitle] = useState("");
 
     //オブジェクトの各要素の型指定
     type Todo = {

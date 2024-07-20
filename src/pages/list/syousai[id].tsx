@@ -1,9 +1,35 @@
 import { Box, Text } from '@chakra-ui/react'
-import React from 'react'
+import { useRouter } from 'next/router'
+import React, { useEffect } from 'react'
 
-interface Props {
-    params: { todoId: number };
+// function ProductDetail() {
+//     const router = useRouter()
+//     console.log('router', router.query)
+//     console.log(router.query.id)
+// }
+
+export async function getStaticProps(context: any) {
+    //contextパラメータのparamsを取り出す
+    const { params } = context
+    //params.postIdでパスを取得
+    const res = await fetch(`https://jsonplaceholder.typicode.com/list/${params.postId}`)
+    const data = await res.json()
+
+    return {
+        props: {
+            post: data,
+        },
+    }
 }
+
+// const router = useRouter()
+
+// useEffect(() => {
+//     const routeId = router.query.id
+//     console.log(routeId)
+// }, [router])
+
+// ProductDetail()
 
 const innerBoxStyles = {
     p: '5',
@@ -13,7 +39,7 @@ const innerBoxStyles = {
 
 
 
-export default function Syousai(props: Props) {
+export default function Syousai() {
     return (
         <div>
             <Box sx={innerBoxStyles}>
@@ -22,7 +48,6 @@ export default function Syousai(props: Props) {
                 </Text>
             </Box>
             <h1>
-                {props.params.todoId}
             </h1>
         </div>
     )

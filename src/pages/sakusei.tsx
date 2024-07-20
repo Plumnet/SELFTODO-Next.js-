@@ -3,7 +3,7 @@ import Create from './components/Create'
 import { Link } from 'react-router-dom';
 import { Box, ChakraProvider, Text } from '@chakra-ui/react';
 import db from '@/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
 import CreateHyozi from './components/CreateHyozi';
 
 
@@ -30,9 +30,9 @@ export default function sakusei(todo: any) {
         setTodoId(todoId + 1);
         //Titleを空にする
         setTodoTitle("");
-        //Titleが空になっているかの確認
-        console.log(todoTitle)
-        await setDoc(doc(db, "todo", todoId.toString()), { id: todoId, titile: todoTitle })
+        //Titleの値を確認する
+        console.log(todoTitle);
+        await addDoc(collection(db, "todo"), { id: todoId, title: todoTitle })
     };
 
     //チェンジイベント用の追加のための関数
@@ -74,7 +74,6 @@ export default function sakusei(todo: any) {
                 </Box>
                 {/* addはonClick、titleは入力フォームの値、addformはonChange */}
                 <Create add={handleAddTodo} title={todoTitle} addform={handleAddFormChanges} />
-                <CreateHyozi map={todo} />
                 <button onClick={() => newTodo(todo)}>ボタン</button>
             </div>
         </ChakraProvider >
