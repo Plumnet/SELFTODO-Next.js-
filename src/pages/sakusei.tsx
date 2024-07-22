@@ -27,7 +27,6 @@ export default function sakusei(todo: any) {
         //スプレッド構文により、変数todosにtodoIdとtodoTitleを追加
         setTodos([...todos, { id: todoId, title: todoTitle }]);
         //現在のIdに+1する
-        setTodoId(todoId + 1);
         //Titleを空にする
         setTodoTitle("");
         //Titleの値を確認する

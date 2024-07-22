@@ -14,6 +14,11 @@ export default function Home() {
         title: string;
     };
 
+    const query = {
+        id: 1,
+        name: "yakkun",
+    };
+
     //オブジェクトの配列の型を指定
     const [todos, setTodos] = useState<Todo[]>([]);
 
@@ -88,14 +93,26 @@ export default function Home() {
                         {todos.map((todo) => (
                             <li key={todo.id} >
                                 {/* 動的ルーティング 、idに対応した詳細画面へ遷移させる */}
-                                <Link href="list/syousai[id]">
-                                    {/* インライン要素で表示する */}
+                                <Link
+                                    href={{
+                                        pathname: `/list/${todo.id}`,
+                                        query: {
+                                            id: todo.id,
+                                            title: todo.title,
+                                        },
+                                    }}>
                                     <span>{todo.title}</span>
                                 </Link>
                                 {/* 編集画面へ遷移させる */}
-                                <a href="/hensyuu">
+                                <Link href={{
+                                    pathname: `/list/edit/${todo.id}`,
+                                    query: {
+                                        id: todo.id,
+                                        title: todo.title,
+                                    },
+                                }}>
                                     <Button colorScheme='teal' size='sm' m={2}>編集</Button>
-                                </a>
+                                </Link>
                                 {/* handleDeleteはonClick、todoはhandleDeleteの引数 */}
                                 <Delete handleDelete={handleDeleteTodo} todo={todo} />
                             </li>
@@ -103,6 +120,6 @@ export default function Home() {
                     </ul >
                 </Box>
             </>
-        </ChakraProvider>
+        </ChakraProvider >
     )
 }

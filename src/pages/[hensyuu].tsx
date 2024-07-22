@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import Edit from './components/Edit'
 import EditForm from './components/EditForm';
 import { Box, ChakraProvider, Text } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
 
 export default function Hensyuu() {
     type Todo = {
@@ -12,6 +13,11 @@ export default function Hensyuu() {
     const [editId, setEditId] = useState('')
     const [newTitle, setNewTitle] = useState('')
     console.log(newTitle)
+
+    const router = useRouter();
+    console.log(router)
+
+
 
     const handleEditTodo = () => {
 
@@ -41,13 +47,17 @@ export default function Hensyuu() {
 
     return (
         <ChakraProvider>
+            <div>
+                <h1>{router.query.id}</h1>
+                <p>{`タスク名: ${router.query.title}`}</p>
+            </div>
             <Box sx={innerBoxStyles}>
                 <Text fontSize={32} color='White' textAlign={['left']}>
                     編集画面
                 </Text>
             </Box>
             <div>
-                <EditForm save={handleEditTodo} edittitle={setNewTitle} editform={handleEditFormChange} ></EditForm>
+                <EditForm save={handleEditTodo} edittitle={router.query.title} editform={handleEditFormChange} ></EditForm>
             </div>
         </ChakraProvider>
     )
