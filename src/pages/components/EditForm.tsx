@@ -7,7 +7,8 @@ export default function EditForm({ save, close, edittitle, editform }: any) {
                 type="text"
                 // label="新しいタイトル"
                 value={edittitle}
-                onChange={editform}
+                onChange={e => editform
+                    (e.target.value)}
             />
             {/* 問題1. 編集ボタンを押すと関数が実行されるようにしよう*/}
             <button onClick={save}>編集を保存</button>
