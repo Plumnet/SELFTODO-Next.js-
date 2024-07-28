@@ -1,6 +1,9 @@
 import React from 'react'
 
 export default function EditForm({ save, close, edittitle, editform }: any) {
+
+
+
     return (
         <div>
             <input
