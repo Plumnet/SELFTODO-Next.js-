@@ -10,7 +10,7 @@ export default function Edit() {
     console.log('routerの中身', router)
 
     //元のコードレッスンのhandleOpenEditForm関数、handleEditFormChange関数のnewTitleのStateに相当する
-    const [editTitle, setEditTitle] = useState<string | string[] | undefined>('TEST')
+    const [editTitle, setEditTitle] = useState<string | string[] | undefined>('TEST++')
 
 
     useEffect(() => {
@@ -82,7 +82,7 @@ export default function Edit() {
         setDoc(todoRef, { id: editId, title: editTitle }, { merge: true });
     }
 
-    //https://zenn.dev/joo_hashi/articles/9bd0ba530d9ee9より引用
+    //https://zenn.dev/joo_hashi/articles/9bd0ba530d9ee9より
     function update5() {
         updateDoc(
             doc(getFirestore(), "todo", docRef.id),

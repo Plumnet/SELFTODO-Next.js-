@@ -10,9 +10,11 @@ import CreateHyozi from './components/CreateHyozi';
 export default function Home() {
     //オブジェクトの各要素の型指定
     type Todo = {
+        docId: string;
         id: number;
         title: string;
     };
+
 
     const query = {
         id: 1,
@@ -47,12 +49,17 @@ export default function Home() {
             //docsは配列を示している、その中身がQueryDocumentSnapshot。
             snapshot.docs.map((doc) => {
                 //ドキュメントのデータが取得できているかの確認
-                console.log('doc', doc.data())
+                // console.log('doc', doc.data())
                 //https://qiita.com/maiyama18/items/86a4573fdce800221b72の解説より
                 //ドキュメントのデータを返す。
-                return doc.data();
+                return { docId: doc.id, ...doc.data() };
             })
         );
+        const querySnapshot = await getDocs(collection(db, "todo"));
+        querySnapshot.forEach((doc) => {
+            // doc.data() is never undefined for query doc snapshots
+            // console.log(doc.id, " => ", doc.data());
+        });
         //tasksがデータが取得出来ているかの確認
         console.log('task', tasks)
         //stateのデータをtasksに更新
@@ -66,6 +73,22 @@ export default function Home() {
     //こちらのログは、画面上でpostと表示される
     //40行目と同じ内容ではある
     console.log('post', posts)
+
+
+    // async function todo() {
+    //     const tasks = await getDocs(collection(db, "todo")).then((snapshot) =>
+
+    //         snapshot.docs.map((doc) => {
+    //             return { docId: doc.id, ...doc.data() };
+    //         })
+    //     );
+    //     const querySnapshot = await getDocs(collection(db, "todo"));
+    //     querySnapshot.forEach((doc) => {
+
+    //     });
+    //     console.log('task', tasks)
+    //     setTodos(tasks as any)
+    // }
 
     //表示部分
     return (
@@ -95,21 +118,13 @@ export default function Home() {
                                 {/* 動的ルーティング 、idに対応した詳細画面へ遷移させる */}
                                 <Link
                                     href={{
-                                        pathname: `/list/${todo.id}`,
-                                        query: {
-                                            id: todo.id,
-                                            title: todo.title,
-                                        },
+                                        pathname: `/list/${todo.docId}`,
                                     }}>
                                     <span>{todo.title}</span>
                                 </Link>
                                 {/* 編集画面へ遷移させる */}
                                 <Link href={{
-                                    pathname: `/list/edit/${todo.id}`,
-                                    query: {
-                                        id: todo.id,
-                                        title: todo.title,
-                                    },
+                                    pathname: `/list/edit/${todo.docId}`,
                                 }}>
                                     <Button colorScheme='teal' size='sm' m={2}>編集</Button>
                                 </Link>
