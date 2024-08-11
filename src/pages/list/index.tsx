@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import Delete from './components/Delete';
+import Delete from '../components/Delete';
 import Link from 'next/link';
 import { Box, Button, ChakraProvider, Text } from '@chakra-ui/react';
 import { collection, getDocs } from 'firebase/firestore';
 import db from '@/firebase';
-import CreateHyozi from './components/CreateHyozi';
+import CreateHyozi from '../components/CreateHyozi';
 
 //コンポーネントを他のファイルから参照できるようにする
 export default function Home() {
     //オブジェクトの各要素の型指定
     type Todo = {
         docId: string;
+        docTitle: string;
         id: number;
         title: string;
     };
@@ -103,7 +104,7 @@ export default function Home() {
                 </Box>
                 {/* 作成ボタンの表示領域*/}
                 <Box m={4}>
-                    <a href="/sakusei">
+                    <a href="/create">
                         <Button colorScheme='red' size='sm'>
                             タスク作成
                         </Button>
@@ -125,6 +126,7 @@ export default function Home() {
                                 {/* 編集画面へ遷移させる */}
                                 <Link href={{
                                     pathname: `/list/edit/${todo.docId}`,
+                                    query: { title: todo.title, },
                                 }}>
                                     <Button colorScheme='teal' size='sm' m={2}>編集</Button>
                                 </Link>

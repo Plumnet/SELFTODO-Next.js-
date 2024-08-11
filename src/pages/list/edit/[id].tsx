@@ -20,6 +20,8 @@ export default function Edit() {
         console.log('routerのタイトル', router.query.title)
     }, [router])
 
+    // const   = router.query.title
+
     type Todo = {
         id: number;
         title: string;
@@ -85,18 +87,19 @@ export default function Edit() {
     //https://zenn.dev/joo_hashi/articles/9bd0ba530d9ee9より
     function update5() {
         updateDoc(
-            doc(getFirestore(), "todo", docRef.id),
+            doc(getFirestore(), "todo",),
             { title: editTitle },
         );
     }
 
     //https://qiita.com/nakapon9517/items/16559ebb211da256e0ab
     async function update6() {
-        const snapshot = await getDoc(doc(db, 'todo', '3AgQ3NHGLLxRuQoAiV9Y'));
-        snapshot.exists() && console.log(snapshot.id);
+        console.log('idとタイトル', editId, editTitle)
+        await updateDoc(doc(db, 'todo', editId as string), { title: editTitle });
+        // snapshot.exists() && console.log(snapshot.id);
     }
 
-    update6()
+    // update6()
 
     //丸々は失敗
     const formchange = () => {
@@ -151,7 +154,7 @@ export default function Edit() {
             <h1>{router.query.id}</h1>
             <p>{`タスク名: ${router.query.title}`}</p>
             <p>{`編集反映確認: ${editTitle}`}</p>
-            <EditForm save={update5} edittitle={editTitle} editform={setEditTitle}></EditForm>
+            <EditForm save={update6} edittitle={editTitle} editform={setEditTitle}></EditForm>
         </div>
     );
 }
