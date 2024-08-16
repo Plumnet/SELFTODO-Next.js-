@@ -54,6 +54,16 @@ export default function index() {
               一覧画面へ
             </Text>
           </Link>
+          <Link href={"/login"}>
+            <Text fontSize={32}>
+              ログイン画面へ
+            </Text>
+          </Link>
+          <Link href={"/register"}>
+            <Text fontSize={32}>
+              新規登録画面へ
+            </Text>
+          </Link>
         </Flex>
       </ChakraProvider>
     </>

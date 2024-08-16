@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react'
 import Delete from '../components/Delete';
 import Link from 'next/link';
 import { Box, Button, ChakraProvider, Text } from '@chakra-ui/react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
 import db from '@/firebase';
 import CreateHyozi from '../components/CreateHyozi';
+import { deleteObject, getStorage, ref } from 'firebase/storage';
 
 //コンポーネントを他のファイルから参照できるようにする
 export default function Home() {
@@ -32,14 +33,41 @@ export default function Home() {
     //targetTodoとtodoで一致していない値を除外する
     const handleDeleteTodo = (targetTodo: any) => {
         console.log('targetTodo', targetTodo)
-        setTodos(todos.filter((todo) => todo !== targetTodo))
+        setTodos(todos.filter((todo) => todo === targetTodo))
     }
+    console.log('AfterTodo', todos)
 
     //画像の制御
     const innerBoxStyles = {
         p: '5',
         backgroundImage:
             'url(https://dynabook.com/assistpc/faq/pcdata2/images2/017385a.gif) ',
+    }
+
+
+
+    // const handleDeleteTodo2 = () => {
+    //     const storage = getStorage();
+    //     // Create a reference to the file to delete
+    //     const desertRef = doc(db, 'todo', id as string), { title: editTitle };
+
+
+
+    //     // Delete the file
+    //     deleteObject(desertRef).then(() => {
+    //         // File deleted successfully
+    //     }).catch((error) => {
+    //         // Uh-oh, an error occurred!
+    //     });
+    // }
+
+
+    // const handleDeleteTodo3 = () => {
+    //     await deleteDoc(doc(db, "cities", todos as ));
+
+    async function red(docId: string) {
+
+        await deleteDoc(doc(db, "todo", docId));
     }
 
     //非同期関数、定義の方で、awaitが代入されているので、
@@ -74,6 +102,26 @@ export default function Home() {
     //こちらのログは、画面上でpostと表示される
     //40行目と同じ内容ではある
     console.log('post', posts)
+
+
+    // function del() {
+    //     todos.map(async (post) => {
+
+    //         await deleteDoc(doc(db, "todo", post.docId))
+
+    //             .then(() => {
+
+    //                 console.log("Document successfully deleted!");
+
+    //             })
+
+    //             .catch((error) => {
+
+    //                 console.error("Error removing document: ", error);
+
+    //             });
+    //     });
+    // }
 
 
     // async function todo() {
@@ -131,7 +179,7 @@ export default function Home() {
                                     <Button colorScheme='teal' size='sm' m={2}>編集</Button>
                                 </Link>
                                 {/* handleDeleteはonClick、todoはhandleDeleteの引数 */}
-                                <Delete handleDelete={handleDeleteTodo} todo={todo} />
+                                <Delete handleDelete={red} todo={todo} />
                             </li>
                         ))}
                     </ul >
