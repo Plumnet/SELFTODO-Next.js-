@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react'
 import Delete from '../components/Delete';
 import Link from 'next/link';
 import { Box, Button, ChakraProvider, Text } from '@chakra-ui/react';
-import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
-import db from '@/firebase';
-import CreateHyozi from '../components/CreateHyozi';
-import { deleteObject, getStorage, ref } from 'firebase/storage';
+import { collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
+import db, { auth } from '@/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 //コンポーネントを他のファイルから参照できるようにする
 export default function Home() {
@@ -17,10 +16,8 @@ export default function Home() {
         title: string;
     };
 
-
-    const query = {
-        id: 1,
-        name: "yakkun",
+    type Select = {
+        code: string;
     };
 
     //オブジェクトの配列の型を指定
@@ -29,13 +26,9 @@ export default function Home() {
     //firestoreのデータ保持用のstate
     const [posts, setPosts] = useState([]);
 
-    //クリックイベント用の削除のための関数
-    //targetTodoとtodoで一致していない値を除外する
-    const handleDeleteTodo = (targetTodo: any) => {
-        console.log('targetTodo', targetTodo)
-        setTodos(todos.filter((todo) => todo === targetTodo))
-    }
-    console.log('AfterTodo', todos)
+    const [user, setUser] = useState<any>("");
+
+    const [error, setError] = useState("");
 
     //画像の制御
     const innerBoxStyles = {
@@ -44,31 +37,57 @@ export default function Home() {
             'url(https://dynabook.com/assistpc/faq/pcdata2/images2/017385a.gif) ',
     }
 
+    async function red(docId: string) {
+        await deleteDoc(doc(db, "todo", docId));
+    }
 
+    // import { collection, getDocs, addDoc } from 'firebase/firestore';
+    // import { db } from './firebaseConfig';
 
-    // const handleDeleteTodo2 = () => {
-    //     const storage = getStorage();
-    //     // Create a reference to the file to delete
-    //     const desertRef = doc(db, 'todo', id as string), { title: editTitle };
+    // // 読み取り操作のデバッグ
+    // async function readTodos() {
+    //     try {
+    //         const querySnapshot = await getDocs(collection(db, "todos"));
+    //         querySnapshot.forEach((doc) => {
+    //             console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
+    //         });
+    //     } catch (error) {
+    //         if (error instanceof Error) {
+    //             const inputElement = document.querySelector<HTMLInputElement>('#error');
+    //             if (!inputElement) return;
+    //             setError(error.message);
+    //             console.error("読み取りエラー:", error);
+    //             console.error("エラーコード:", error.code);
 
+    //             console.error("エラーメッセージ:", error.message);
+    //         } else {
+    //             setError('An unknown error occurred');
+    //         }
 
+    //     }
+    // }
 
-    //     // Delete the file
-    //     deleteObject(desertRef).then(() => {
-    //         // File deleted successfully
-    //     }).catch((error) => {
-    //         // Uh-oh, an error occurred!
-    //     });
+    // // 書き込み操作のデバッグ
+    // async function addTodo(title: any) {
+    //     try {
+    //         const docRef = await addDoc(collection(db, "todos"), {
+    //             title: title,
+    //             completed: false,
+    //             createdAt: new Date()
+    //         });
+    //         console.log("ドキュメント追加成功。ID:", docRef.id);
+    //     } catch (error) {
+    //         console.error("書き込みエラー:", error);
+    //         console.error("エラーコード:", error.code);
+    //         console.error("エラーメッセージ:", error.message);
+    //     }
     // }
 
 
-    // const handleDeleteTodo3 = () => {
-    //     await deleteDoc(doc(db, "cities", todos as ));
 
-    async function red(docId: string) {
 
-        await deleteDoc(doc(db, "todo", docId));
-    }
+
+
 
     //非同期関数、定義の方で、awaitが代入されているので、
     //これを使わないと、コンパイルエラーになってしまう。
@@ -85,59 +104,40 @@ export default function Home() {
             })
         );
         const querySnapshot = await getDocs(collection(db, "todo"));
-        querySnapshot.forEach((doc) => {
-            // doc.data() is never undefined for query doc snapshots
-            // console.log(doc.id, " => ", doc.data());
+        querySnapshot.forEach(() => {
         });
         //tasksがデータが取得出来ているかの確認
         console.log('task', tasks)
         //stateのデータをtasksに更新
         setTodos(tasks as any)
+
+        const handleAddTodo = async () => {
+            onAuthStateChanged(auth, async (currentUser) => {
+                setUser(currentUser);
+                const q = query(collection(db, "todo"), where("currentUser.id", "==", "todoId"));
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach((doc) => {
+                    // doc.data() is never undefined for query doc snapshots
+                    console.log(doc.id === " => ", doc.data());
+                });
+            }
+            )
+        }
+        //todo関数を呼び出す
+        useEffect(() => {
+            todo()
+        }, []);
     }
-    //todo関数を呼び出す
-    useEffect(() => {
-        todo()
-    }, []);
-    // todo()
+    todo()
     //こちらのログは、画面上でpostと表示される
     //40行目と同じ内容ではある
     console.log('post', posts)
 
 
-    // function del() {
-    //     todos.map(async (post) => {
-
-    //         await deleteDoc(doc(db, "todo", post.docId))
-
-    //             .then(() => {
-
-    //                 console.log("Document successfully deleted!");
-
-    //             })
-
-    //             .catch((error) => {
-
-    //                 console.error("Error removing document: ", error);
-
-    //             });
-    //     });
-    // }
 
 
-    // async function todo() {
-    //     const tasks = await getDocs(collection(db, "todo")).then((snapshot) =>
 
-    //         snapshot.docs.map((doc) => {
-    //             return { docId: doc.id, ...doc.data() };
-    //         })
-    //     );
-    //     const querySnapshot = await getDocs(collection(db, "todo"));
-    //     querySnapshot.forEach((doc) => {
 
-    //     });
-    //     console.log('task', tasks)
-    //     setTodos(tasks as any)
-    // }
 
     //表示部分
     return (

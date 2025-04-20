@@ -1,27 +1,8 @@
-import { Box, Button, ChakraProvider, Flex, Text } from '@chakra-ui/react'
+import { Box, ChakraProvider, Flex, Text } from '@chakra-ui/react'
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
-// import db from "@/lib/firebase/firebase";
-import { QuerySnapshot, collection, getDocs, query, where } from "firebase/firestore";
-import db from '@/firebase';
-
+import Header from './components/Header'
 
 export default function index() {
-
-
-  //現在、未使用
-  const [taskId, setTaskId] = useState([]);
-
-  // async function todo() {
-  //   const col = collection(db, "todo");
-  //   const q = query(col, where("id", "==", 1));
-  //   const task: any = await getDocs(q).then((snapshot) => {
-  //     return snapshot.docs[0].data();
-  //   });
-  //   console.log(task)
-  // }
-
-
   //画像の制御
   const innerBoxStyles = {
     // boxSize: '150px',
@@ -29,9 +10,6 @@ export default function index() {
     backgroundImage:
       'url(https://livedoor.blogimg.jp/zeropasoakita/imgs/e/5/e555c3b1-s.jpg) ',
   }
-
-
-
 
   //表示部分
   return (
@@ -70,6 +48,4 @@ export default function index() {
   )
 }
 
-//https://zenn.dev/kiwichan101kg/articles/ee5460b61bce25のデータ一覧の取得より引用
-//https://firebase.google.com/docs/reference/js/firestore_?hl=jaの解説より
-//https://zenn.dev/joo_hashi/scraps/ca249288c3952cより
+
