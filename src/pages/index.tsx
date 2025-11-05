@@ -1,68 +1,107 @@
-import { Box, Flex, Text } from '@chakra-ui/react'
+import { Box, Container, VStack, Heading, Text, Button, SimpleGrid, Card, CardBody } from '@chakra-ui/react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { collection, getDocs } from "firebase/firestore"
-import db from '@/firebase'
-
-const innerBoxStyles = {
-  padding: '20px',
-  margin: '20px',
-};
 
 export default function Index() {
-  const [posts, setPosts] = useState<any[]>([]);
-
-  useEffect(() => {
-    //https://zenn.dev/kiwichan101kg/articles/ee5460b61bce25の条件付きデータの取得より、Cannot read properties of undefined (reading 'data')エラーになってしまいます。
-    async function fetchTodo() {
-      try {
-        const col = collection(db, "todo");
-        // todoIdが空の場合は全件取得
-        const snapshot = await getDocs(col);
-        const todos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log(todos);
-        setPosts(todos);
-      } catch (error) {
-        console.error("Error fetching todos:", error);
-      }
-    }
-
-    fetchTodo();
-  }, [])
-
-
-
-
   //表示部分
   return (
-    //1つの要素でしか、返却できないので必要不可欠
-    <>
-      {/* 要素の範囲 */}
-      <Box sx={innerBoxStyles}>
-        {/* テキストの制御 */}
-        <Text fontSize={32} color='RED' textAlign={['left']}>
-          ホーム画面
-        </Text>
-      </Box>
-      {/* 要素を並列にする */}
-      <Flex align="center" justify="center" padding={200}>
-        {/* リンクを設定する */}
-        <Link href={"/list"}>
-          <Text fontSize={32}>
-            一覧画面へ
+    <Container maxW="container.xl" py={12}>
+      <VStack spacing={12}>
+        {/* ヒーローセクション */}
+        <Box
+          bgGradient="linear(to-r, purple.500, pink.500)"
+          w="100%"
+          p={16}
+          borderRadius="2xl"
+          boxShadow="2xl"
+          textAlign="center"
+        >
+          <Heading color="white" size="2xl" mb={4}>
+            SELFTODO
+          </Heading>
+          <Text color="whiteAlpha.900" fontSize="xl" mb={8}>
+            シンプルで使いやすいタスク管理アプリ
           </Text>
-        </Link>
-        <Link href={"/login"}>
-          <Text fontSize={32}>
-            ログイン画面へ
-          </Text>
-        </Link>
-        <Link href={"/register"}>
-          <Text fontSize={32}>
-            新規登録画面へ
-          </Text>
-        </Link>
-      </Flex>
-    </>
+          <Link href="/list">
+            <Button
+              size="lg"
+              colorScheme="whiteAlpha"
+              bg="white"
+              color="purple.600"
+              px={8}
+              _hover={{ transform: 'translateY(-2px)', boxShadow: 'xl' }}
+              transition="all 0.2s"
+            >
+              今すぐ始める
+            </Button>
+          </Link>
+        </Box>
+
+        {/* ナビゲーションカード */}
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} w="100%">
+          <Link href="/list">
+            <Card
+              _hover={{ transform: 'translateY(-4px)', boxShadow: 'xl' }}
+              transition="all 0.3s"
+              cursor="pointer"
+              bg="teal.50"
+              borderTop="4px solid"
+              borderColor="teal.500"
+            >
+              <CardBody textAlign="center" py={8}>
+                <Text fontSize="4xl" mb={4}>📝</Text>
+                <Heading size="md" mb={2} color="teal.700">
+                  タスク一覧
+                </Heading>
+                <Text color="gray.600">
+                  すべてのタスクを確認・管理
+                </Text>
+              </CardBody>
+            </Card>
+          </Link>
+
+          <Link href="/login">
+            <Card
+              _hover={{ transform: 'translateY(-4px)', boxShadow: 'xl' }}
+              transition="all 0.3s"
+              cursor="pointer"
+              bg="blue.50"
+              borderTop="4px solid"
+              borderColor="blue.500"
+            >
+              <CardBody textAlign="center" py={8}>
+                <Text fontSize="4xl" mb={4}>🔐</Text>
+                <Heading size="md" mb={2} color="blue.700">
+                  ログイン
+                </Heading>
+                <Text color="gray.600">
+                  アカウントにサインイン
+                </Text>
+              </CardBody>
+            </Card>
+          </Link>
+
+          <Link href="/register">
+            <Card
+              _hover={{ transform: 'translateY(-4px)', boxShadow: 'xl' }}
+              transition="all 0.3s"
+              cursor="pointer"
+              bg="purple.50"
+              borderTop="4px solid"
+              borderColor="purple.500"
+            >
+              <CardBody textAlign="center" py={8}>
+                <Text fontSize="4xl" mb={4}>✨</Text>
+                <Heading size="md" mb={2} color="purple.700">
+                  新規登録
+                </Heading>
+                <Text color="gray.600">
+                  新しくアカウントを作成
+                </Text>
+              </CardBody>
+            </Card>
+          </Link>
+        </SimpleGrid>
+      </VStack>
+    </Container>
   )
 }

@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import Create from './components/create'
-import { Box, Text } from '@chakra-ui/react';
+import { Container, Box, Heading, Text, VStack, Input, Button, FormControl, FormLabel, Card, CardBody } from '@chakra-ui/react';
 import db, { auth } from '@/firebase';
 import { addDoc, collection } from 'firebase/firestore';
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 
 export default function CreatePage() {
     const router = useRouter();
@@ -60,29 +60,72 @@ export default function CreatePage() {
 
 
 
-    //チェンジイベント用の追加のための関数
-    const handleAddFormChanges = (e: any) => {
-        setTodoTitle(e.target.value);
-    };
-
-    //画像の制御
-    const innerBoxStyles = {
-        p: '5',
-        backgroundImage:
-            'url(http://rynona.sakura.ne.jp/sblo_files/rygames/image/Ws001282_-thumbnail2.png) ',
-    }
-
     //表示部分
     return (
-        <div>
-            {/* 見出し部分の表示領域 */}
-            <Box sx={innerBoxStyles}>
-                <Text fontSize={32} color='Yellow' textAlign={['left']}>
-                    作成画面
-                </Text>
-            </Box>
-            {/* addはonClick、titleは入力フォームの値、addformはonChange */}
-            <Create add={handleAddTodo} title={todoTitle} addform={handleAddFormChanges} />
-        </div>
+        <Container maxW="container.md" py={8}>
+            <VStack spacing={6} align="stretch">
+                {/* ヘッダー部分 */}
+                <Box
+                    bgGradient="linear(to-r, orange.400, yellow.400)"
+                    p={8}
+                    borderRadius="xl"
+                    boxShadow="lg"
+                >
+                    <Heading color="white" size="xl" mb={2}>
+                        タスク作成
+                    </Heading>
+                    <Text color="whiteAlpha.900" fontSize="md">
+                        新しいタスクを追加しましょう
+                    </Text>
+                </Box>
+
+                {/* 入力フォーム */}
+                <Card boxShadow="lg">
+                    <CardBody>
+                        <VStack spacing={6}>
+                            <FormControl isRequired>
+                                <FormLabel fontSize="lg" fontWeight="bold">
+                                    タスク名
+                                </FormLabel>
+                                <Input
+                                    placeholder="例: 買い物に行く"
+                                    size="lg"
+                                    value={todoTitle}
+                                    onChange={(e) => setTodoTitle(e.target.value)}
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleAddTodo();
+                                        }
+                                    }}
+                                />
+                            </FormControl>
+
+                            <VStack spacing={3} width="100%">
+                                <Button
+                                    colorScheme="teal"
+                                    size="lg"
+                                    width="100%"
+                                    onClick={handleAddTodo}
+                                    boxShadow="md"
+                                    _hover={{ transform: 'translateY(-2px)', boxShadow: 'xl' }}
+                                    transition="all 0.2s"
+                                >
+                                    作成する
+                                </Button>
+                                <Link href="/list" style={{ width: '100%' }}>
+                                    <Button
+                                        variant="outline"
+                                        size="lg"
+                                        width="100%"
+                                    >
+                                        キャンセル
+                                    </Button>
+                                </Link>
+                            </VStack>
+                        </VStack>
+                    </CardBody>
+                </Card>
+            </VStack>
+        </Container>
     )
 }

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import Delete from '../components/Delete';
 import Link from 'next/link';
-import { Box, Button, Text } from '@chakra-ui/react';
-import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
-import db from '@/firebase';
+import { Box, Button, Text, Container, VStack, HStack, Heading, Card, CardBody, Flex, Badge, Spinner, Center } from '@chakra-ui/react';
+import { collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
+import db, { auth } from '@/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 //コンポーネントを他のファイルから参照できるようにする
 export default function Home() {
@@ -17,13 +18,8 @@ export default function Home() {
 
     //オブジェクトの配列の型を指定
     const [todos, setTodos] = useState<Todo[]>([]);
-
-    //画像の制御
-    const innerBoxStyles = {
-        p: '5',
-        backgroundImage:
-            'url(https://dynabook.com/assistpc/faq/pcdata2/images2/017385a.gif) ',
-    }
+    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
     async function red(docId: string) {
         try {
@@ -39,81 +35,53 @@ export default function Home() {
         }
     }
 
-    // import { collection, getDocs, addDoc } from 'firebase/firestore';
-    // import { db } from './firebaseConfig';
-
-    // // 読み取り操作のデバッグ
-    // async function readTodos() {
-    //     try {
-    //         const querySnapshot = await getDocs(collection(db, "todos"));
-    //         querySnapshot.forEach((doc) => {
-    //             console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
-    //         });
-    //     } catch (error) {
-    //         if (error instanceof Error) {
-    //             const inputElement = document.querySelector<HTMLInputElement>('#error');
-    //             if (!inputElement) return;
-    //             setError(error.message);
-    //             console.error("読み取りエラー:", error);
-    //             console.error("エラーコード:", error.code);
-
-    //             console.error("エラーメッセージ:", error.message);
-    //         } else {
-    //             setError('An unknown error occurred');
-    //         }
-
-    //     }
-    // }
-
-    // // 書き込み操作のデバッグ
-    // async function addTodo(title: any) {
-    //     try {
-    //         const docRef = await addDoc(collection(db, "todos"), {
-    //             title: title,
-    //             completed: false,
-    //             createdAt: new Date()
-    //         });
-    //         console.log("ドキュメント追加成功。ID:", docRef.id);
-    //     } catch (error) {
-    //         console.error("書き込みエラー:", error);
-    //         console.error("エラーコード:", error.code);
-    //         console.error("エラーメッセージ:", error.message);
-    //     }
-    // }
 
 
-
-
-
-
-
-    //非同期関数、定義の方で、awaitが代入されているので、
-    //これを使わないと、コンパイルエラーになってしまう。
-    async function fetchTodos() {
+    //ユーザーごとのタスクを取得する関数
+    async function fetchTodos(userId: string) {
         try {
-            //クエリを実行し、結果をQuerySnapshotとして返す。DocumentReferenceを参照している。
-            const tasks = await getDocs(collection(db, "todo")).then((snapshot) =>
-                //docsは配列を示している、その中身がQueryDocumentSnapshot。
-                snapshot.docs.map((doc) => {
-                    //ドキュメントのデータが取得できているかの確認
-                    // console.log('doc', doc.data())
-                    //https://qiita.com/maiyama18/items/86a4573fdce800221b72の解説より
-                    //ドキュメントのデータを返す。
-                    return { docId: doc.id, ...doc.data() };
-                })
-            );
-            //tasksがデータが取得出来ているかの確認
-            console.log('task', tasks)
-            //stateのデータをtasksに更新
-            setTodos(tasks as any)
+            setLoading(true);
+            let tasksQuery;
+
+            if (userId === "anonymous") {
+                // 匿名ユーザーの場合は、idが"anonymous"のタスクのみ取得
+                tasksQuery = query(collection(db, "todo"), where("id", "==", "anonymous"));
+            } else {
+                // ログインユーザーの場合は、そのユーザーのタスクのみ取得
+                tasksQuery = query(collection(db, "todo"), where("id", "==", userId));
+            }
+
+            const snapshot = await getDocs(tasksQuery);
+            const tasks = snapshot.docs.map((doc) => {
+                return { docId: doc.id, ...doc.data() };
+            });
+
+            console.log('Fetched tasks for user:', userId, tasks);
+            setTodos(tasks as any);
         } catch (error) {
             console.error("Error fetching todos:", error);
+        } finally {
+            setLoading(false);
         }
     }
 
-    //todo関数を呼び出す
+    //認証状態の監視とタスクの取得
     useEffect(() => {
-        fetchTodos()
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setCurrentUser(user);
+            if (user) {
+                // ログインユーザーのタスクを取得
+                console.log("User logged in:", user.uid);
+                fetchTodos(user.uid);
+            } else {
+                // 匿名ユーザーのタスクを取得
+                console.log("User not logged in, showing anonymous tasks");
+                fetchTodos("anonymous");
+            }
+        });
+
+        // クリーンアップ関数
+        return () => unsubscribe();
     }, []);
 
 
@@ -124,47 +92,105 @@ export default function Home() {
 
     //表示部分
     return (
-        <>
-            {/* 見出し部分の表示領域 */}
-            <Box sx={innerBoxStyles}>
-                <Text fontSize={32} color='Green' textAlign={['left']}>
-                    一覧画面
-                </Text>
-            </Box>
-            {/* 作成ボタンの表示領域*/}
-            <Box m={4}>
-                <a href="/create">
-                    <Button colorScheme='red' size='sm'>
-                        タスク作成
-                    </Button>
-                </a>
-            </Box>
-            {/* タスク項目、編集ボタン、削除ボタンの表示領域*/}
-            <Box m={8}>
-                <ul>
-                    {/* todosの結果を配列として返す */}
-                    {todos.map((todo) => (
-                        <li key={todo.id} >
-                            {/* 動的ルーティング 、idに対応した詳細画面へ遷移させる */}
-                            <Link
-                                href={{
-                                    pathname: `/list/${todo.docId}`,
-                                }}>
-                                <span>{todo.title}</span>
-                            </Link>
-                            {/* 編集画面へ遷移させる */}
-                            <Link href={{
-                                pathname: `/list/edit/${todo.docId}`,
-                                query: { title: todo.title, },
-                            }}>
-                                <Button colorScheme='teal' size='sm' m={2}>編集</Button>
-                            </Link>
-                            {/* handleDeleteはonClick、todoはhandleDeleteの引数 */}
-                            <Delete handleDelete={red} todo={todo} />
-                        </li>
-                    ))}
-                </ul >
-            </Box>
-        </>
+        <Container maxW="container.lg" py={8}>
+            <VStack spacing={6} align="stretch">
+                {/* ヘッダー部分 */}
+                <Box
+                    bgGradient="linear(to-r, teal.500, green.500)"
+                    p={8}
+                    borderRadius="xl"
+                    boxShadow="lg"
+                >
+                    <Heading color="white" size="xl" mb={2}>
+                        タスク一覧
+                    </Heading>
+                    <Text color="whiteAlpha.900" fontSize="md">
+                        {currentUser
+                            ? `ようこそ、${currentUser.email || 'ユーザー'}さん`
+                            : 'ゲストモードで表示しています'}
+                    </Text>
+                </Box>
+
+                {/* 作成ボタン */}
+                <Flex justify="space-between" align="center">
+                    <Badge colorScheme="green" fontSize="lg" px={3} py={1} borderRadius="md">
+                        {todos.length} 件のタスク
+                    </Badge>
+                    <Link href="/create">
+                        <Button
+                            colorScheme='teal'
+                            size='lg'
+                            boxShadow="md"
+                            _hover={{ transform: 'translateY(-2px)', boxShadow: 'xl' }}
+                            transition="all 0.2s"
+                        >
+                            ＋ タスク作成
+                        </Button>
+                    </Link>
+                </Flex>
+
+                {/* タスクリスト */}
+                <VStack spacing={3} align="stretch">
+                    {loading ? (
+                        <Center py={12}>
+                            <VStack spacing={4}>
+                                <Spinner size="xl" color="teal.500" thickness="4px" />
+                                <Text color="gray.600">読み込み中...</Text>
+                            </VStack>
+                        </Center>
+                    ) : todos.length === 0 ? (
+                        <Card>
+                            <CardBody>
+                                <Text color="gray.500" textAlign="center" py={8}>
+                                    タスクがありません。新しいタスクを作成しましょう！
+                                </Text>
+                            </CardBody>
+                        </Card>
+                    ) : (
+                        todos.map((todo) => (
+                            <Card
+                                key={todo.docId}
+                                boxShadow="md"
+                                _hover={{ boxShadow: 'xl', transform: 'translateY(-2px)' }}
+                                transition="all 0.2s"
+                            >
+                                <CardBody>
+                                    <Flex justify="space-between" align="center">
+                                        <Link
+                                            href={`/list/${todo.docId}`}
+                                            style={{ flex: 1 }}
+                                        >
+                                            <Text
+                                                fontSize="lg"
+                                                fontWeight="medium"
+                                                _hover={{ color: 'teal.500' }}
+                                                cursor="pointer"
+                                            >
+                                                {todo.title}
+                                            </Text>
+                                        </Link>
+                                        <HStack spacing={2}>
+                                            <Link href={{
+                                                pathname: `/list/edit/${todo.docId}`,
+                                                query: { title: todo.title },
+                                            }}>
+                                                <Button
+                                                    colorScheme='blue'
+                                                    size='sm'
+                                                    variant="outline"
+                                                >
+                                                    編集
+                                                </Button>
+                                            </Link>
+                                            <Delete handleDelete={red} todo={todo} />
+                                        </HStack>
+                                    </Flex>
+                                </CardBody>
+                            </Card>
+                        ))
+                    )}
+                </VStack>
+            </VStack>
+        </Container>
     )
 }
