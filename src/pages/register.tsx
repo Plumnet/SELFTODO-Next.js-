@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged } from "firebase/auth";
-import db, { auth } from "@/firebase";
-import { BrowserRouter, Navigate } from "react-router-dom";
-import { addDoc, collection, doc, getDocs, setDoc } from "firebase/firestore";
+import db from "@/firebase";
+import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import Link from "next/link";
-import Router from "next/router";
 import { useRouter } from "next/navigation";
-import { useRef, } from "react"
 
 
 const register = () => {
@@ -85,43 +82,46 @@ const register = () => {
 
 
 
-    const [user, setUser] = useState<any>("");
-
     const router = useRouter()
 
-    // useEffect(() => {
-    //     onAuthStateChanged(auth, (currentUser) => {
-    //         setUser(currentUser);
-    //         if (currentUser !== null) {
-    //             router.push('/mypage')
-    //         }
-    //     });
-    // }, []);
-
     useEffect(() => {
-        onAuthStateChanged(auth, async (currentUser) => {
-            setUser(currentUser);
-            const createuser = async (currentUser: any) => {
-                await setDoc(doc(db, "user", currentUser?.uid), { id: currentUser?.uid, userDisplayName: currentUser?.displayName, email: currentUser?.email })
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+
+            // ユーザーがログインしていない場合は処理をスキップ
+            if (!currentUser) {
+                console.log('No user logged in');
+                return;
             }
-            const allusers = await getDocs(collection(db, "user")).then((snapshot) =>
-                //docsは配列を示している、その中身がQueryDocumentSnapshot。
-                snapshot.docs.map((doc) => {
-                    //ドキュメントのデータが取得できているかの確認
-                    // console.log('doc', doc.data())
-                    //https://qiita.com/maiyama18/items/86a4573fdce800221b72の解説より
-                    //ドキュメントのデータを返す。
-                    console.log('?', currentUser)
+
+            try {
+                const createuser = async (currentUser: any) => {
+                    await setDoc(doc(db, "user", currentUser.uid), {
+                        id: currentUser.uid,
+                        userDisplayName: currentUser.displayName || '',
+                        email: currentUser.email
+                    });
+                };
+
+                const snapshot = await getDocs(collection(db, "user"));
+                const allusers = snapshot.docs.map((doc) => {
                     return { docId: doc.id, ...doc.data() };
+                });
+
+                console.log('Current user:', currentUser.uid);
+                console.log('Existing users:', allusers);
+
+                // ユーザーがまだ登録されていない場合のみ作成
+                const userExists = allusers.some(user => user.docId === currentUser.uid);
+                if (!userExists) {
+                    console.log('Creating new user document');
+                    await createuser(currentUser);
                 }
-                ))
-            console.log('allusers?.filter(user => user.docId === currentUser?.uid).length !== 0', allusers?.filter(user => user.docId === currentUser?.uid).length !== 0)
-            console.log('????2', user.docId)
-            console.log('????3', currentUser?.uid)
-            if (allusers?.filter(user => user.docId === currentUser?.uid).length === 0) {
-                createuser(currentUser);
+            } catch (error) {
+                console.error('Error in user registration:', error);
             }
         });
+
+        return () => unsubscribe();
     }, []);
 
 
