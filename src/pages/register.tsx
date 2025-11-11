@@ -1,169 +1,265 @@
-import { useEffect, useState } from "react";
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged } from "firebase/auth";
+import { useState } from "react";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/firebase";
+import { doc, setDoc } from "firebase/firestore";
 import db from "@/firebase";
-import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
+import {
+    Container,
+    Box,
+    Heading,
+    Text,
+    VStack,
+    Input,
+    Button,
+    FormControl,
+    FormLabel,
+    Card,
+    CardBody,
+    useToast,
+    FormErrorMessage
+} from '@chakra-ui/react';
 
-
-const register = () => {
-
-    type User = {
-        docId: string;
-        docTitle: string;
-        id: number;
-        title: string;
-    };
-
+const Register = () => {
     const [registerUserName, setRegisterUserName] = useState("");
     const [registerEmail, setRegisterEmail] = useState("");
     const [registerPassword, setRegisterPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({
+        userName: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+    });
 
+    const router = useRouter();
+    const toast = useToast();
 
+    // バリデーション
+    const validateForm = () => {
+        const newErrors = {
+            userName: "",
+            email: "",
+            password: "",
+            confirmPassword: ""
+        };
 
-    //当初のコード
-    // const handleSubmit = async (e: any) => {
-    //     e.preventDefault();
+        if (!registerUserName.trim()) {
+            newErrors.userName = "ユーザー名を入力してください";
+        }
 
-    //     try {
-    //         await createUserWithEmailAndPassword(
-    //             auth,
-    //             registerEmail,
-    //             registerPassword
-    //         );
+        if (!registerEmail.trim()) {
+            newErrors.email = "メールアドレスを入力してください";
+        } else if (!/\S+@\S+\.\S+/.test(registerEmail)) {
+            newErrors.email = "有効なメールアドレスを入力してください";
+        }
 
-    //     } catch (error) {
-    //         alert("正しく入力してください");
-    //     }
+        if (!registerPassword) {
+            newErrors.password = "パスワードを入力してください";
+        } else if (registerPassword.length < 6) {
+            newErrors.password = "パスワードは6文字以上で入力してください";
+        }
 
-    // };
+        if (!confirmPassword) {
+            newErrors.confirmPassword = "確認用パスワードを入力してください";
+        } else if (registerPassword !== confirmPassword) {
+            newErrors.confirmPassword = "パスワードが一致しません";
+        }
 
-    const auth = getAuth();
+        setErrors(newErrors);
+        return !Object.values(newErrors).some(error => error !== "");
+    };
 
-    //1.メール、パスワードを使ってユーザーを作成する firbaseAuth
-    //2.ユーザーの情報をデータベースに登録する fireStore
-    const handleSubmit = async (e: any) => {
-        e.preventDefault()
-        createUserWithEmailAndPassword(auth, registerEmail, registerPassword)
-            .then((userCredential) => {
-                // Signed in 
-                const user = userCredential.user;
-                console.log('user', user)
-                //userに値が入っていれば
-                if (user) {
-                    //userの中にあるuidをuidに代入
-                    const uid = user.uid
-                    //他にも持っている値でfirestoreに登録したいものをuserInitialDataに代入
-                    const userInitialData = {
-                        email: registerEmail,
-                        uid: uid,
-                    }
-                }
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                // ..
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            // Firebase Authenticationでユーザーを作成
+            const userCredential = await createUserWithEmailAndPassword(
+                auth,
+                registerEmail,
+                registerPassword
+            );
+
+            const user = userCredential.user;
+            console.log('User created:', user.uid);
+
+            // Firestoreにユーザー情報を保存
+            await setDoc(doc(db, "user", user.uid), {
+                id: user.uid,
+                userName: registerUserName,
+                email: registerEmail,
+                createdAt: new Date(),
             });
-        //firestoreのusersというコレクションに、uidをドキュメントIDとしてもつ、 userInitialDataを登録する※記事のコード
-        //     firebase.firestore().collection('user').doc(uid).set(userInitialData)
-        // }
-        //別の記事のコード、ただしFlluter用なのであまり参考にはならない
-        // await db.collection('user').doc(uid).set(newPost.toMap());
-        //         .then('ユーザーが作成されました!')
-        const frankDocRef = doc(db, "user", "frank");
-        await setDoc(frankDocRef, {
-            name: "Frank",
-            favorites: { food: "Pizza", color: "Blue", subject: "recess" },
-            age: 12
-        });
-    }
 
+            console.log('User data saved to Firestore');
 
+            // 成功メッセージを表示
+            toast({
+                title: "登録完了",
+                description: "アカウントが作成されました。ログインページに移動します。",
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
 
+            // ログインページにリダイレクト
+            setTimeout(() => {
+                router.push('/login');
+            }, 1500);
 
-    const router = useRouter()
+        } catch (error: any) {
+            console.error("Registration error:", error);
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            let errorMessage = "登録に失敗しました";
 
-            // ユーザーがログインしていない場合は処理をスキップ
-            if (!currentUser) {
-                console.log('No user logged in');
-                return;
+            if (error.code === "auth/email-already-in-use") {
+                errorMessage = "このメールアドレスは既に使用されています";
+            } else if (error.code === "auth/invalid-email") {
+                errorMessage = "無効なメールアドレスです";
+            } else if (error.code === "auth/weak-password") {
+                errorMessage = "パスワードが弱すぎます";
             }
 
-            try {
-                const createuser = async (currentUser: any) => {
-                    await setDoc(doc(db, "user", currentUser.uid), {
-                        id: currentUser.uid,
-                        userDisplayName: currentUser.displayName || '',
-                        email: currentUser.email
-                    });
-                };
-
-                const snapshot = await getDocs(collection(db, "user"));
-                const allusers = snapshot.docs.map((doc) => {
-                    return { docId: doc.id, ...doc.data() };
-                });
-
-                console.log('Current user:', currentUser.uid);
-                console.log('Existing users:', allusers);
-
-                // ユーザーがまだ登録されていない場合のみ作成
-                const userExists = allusers.some(user => user.docId === currentUser.uid);
-                if (!userExists) {
-                    console.log('Creating new user document');
-                    await createuser(currentUser);
-                }
-            } catch (error) {
-                console.error('Error in user registration:', error);
-            }
-        });
-
-        return () => unsubscribe();
-    }, []);
-
-
+            toast({
+                title: "エラー",
+                description: errorMessage,
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <>
-            <h1>新規登録</h1>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>ユーザー名</label>
-                    <input
-                        name="user"
-                        type="user"
-                        value={registerUserName}
-                        onChange={(e) => setRegisterUserName(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label>メールアドレス</label>
-                    <input
-                        name="email"
-                        type="email"
-                        value={registerEmail}
-                        onChange={(e) => setRegisterEmail(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label>パスワード</label>
-                    <input
-                        name="password"
-                        type="password"
-                        value={registerPassword}
-                        onChange={(e) => setRegisterPassword(e.target.value)}
-                    />
-                </div>
-                <button>登録する</button>
-                <Link href="/">
-                    <button>TOPに戻る</button>
-                </Link>
-            </form>
-        </>
+        <Container maxW="container.sm" py={8}>
+            <VStack spacing={6} align="stretch">
+                {/* ヘッダー部分 */}
+                <Box
+                    bgGradient="linear(to-r, purple.500, pink.500)"
+                    p={8}
+                    borderRadius="xl"
+                    boxShadow="lg"
+                >
+                    <Heading color="white" size="xl" mb={2}>
+                        新規登録
+                    </Heading>
+                    <Text color="whiteAlpha.900" fontSize="md">
+                        アカウントを作成してタスク管理を始めましょう
+                    </Text>
+                </Box>
+
+                {/* 登録フォーム */}
+                <Card boxShadow="lg">
+                    <CardBody>
+                        <form onSubmit={handleSubmit}>
+                            <VStack spacing={4}>
+                                <FormControl isRequired isInvalid={!!errors.userName}>
+                                    <FormLabel>ユーザー名</FormLabel>
+                                    <Input
+                                        type="text"
+                                        placeholder="山田太郎"
+                                        value={registerUserName}
+                                        onChange={(e) => {
+                                            setRegisterUserName(e.target.value);
+                                            setErrors({...errors, userName: ""});
+                                        }}
+                                    />
+                                    <FormErrorMessage>{errors.userName}</FormErrorMessage>
+                                </FormControl>
+
+                                <FormControl isRequired isInvalid={!!errors.email}>
+                                    <FormLabel>メールアドレス</FormLabel>
+                                    <Input
+                                        type="email"
+                                        placeholder="example@email.com"
+                                        value={registerEmail}
+                                        onChange={(e) => {
+                                            setRegisterEmail(e.target.value);
+                                            setErrors({...errors, email: ""});
+                                        }}
+                                    />
+                                    <FormErrorMessage>{errors.email}</FormErrorMessage>
+                                </FormControl>
+
+                                <FormControl isRequired isInvalid={!!errors.password}>
+                                    <FormLabel>パスワード</FormLabel>
+                                    <Input
+                                        type="password"
+                                        placeholder="6文字以上"
+                                        value={registerPassword}
+                                        onChange={(e) => {
+                                            setRegisterPassword(e.target.value);
+                                            setErrors({...errors, password: ""});
+                                        }}
+                                    />
+                                    <FormErrorMessage>{errors.password}</FormErrorMessage>
+                                </FormControl>
+
+                                <FormControl isRequired isInvalid={!!errors.confirmPassword}>
+                                    <FormLabel>パスワード（確認）</FormLabel>
+                                    <Input
+                                        type="password"
+                                        placeholder="もう一度入力してください"
+                                        value={confirmPassword}
+                                        onChange={(e) => {
+                                            setConfirmPassword(e.target.value);
+                                            setErrors({...errors, confirmPassword: ""});
+                                        }}
+                                    />
+                                    <FormErrorMessage>{errors.confirmPassword}</FormErrorMessage>
+                                </FormControl>
+
+                                <VStack spacing={3} width="100%">
+                                    <Button
+                                        type="submit"
+                                        colorScheme="purple"
+                                        size="lg"
+                                        width="100%"
+                                        isLoading={loading}
+                                        loadingText="登録中..."
+                                        boxShadow="md"
+                                        _hover={{ transform: 'translateY(-2px)', boxShadow: 'xl' }}
+                                        transition="all 0.2s"
+                                    >
+                                        登録する
+                                    </Button>
+
+                                    <Link href="/" style={{ width: '100%' }}>
+                                        <Button
+                                            variant="outline"
+                                            size="lg"
+                                            width="100%"
+                                            isDisabled={loading}
+                                        >
+                                            TOPに戻る
+                                        </Button>
+                                    </Link>
+
+                                    <Text fontSize="sm" color="gray.600" textAlign="center">
+                                        既にアカウントをお持ちですか？{" "}
+                                        <Link href="/login" style={{ color: '#805AD5', textDecoration: 'underline' }}>
+                                            ログイン
+                                        </Link>
+                                    </Text>
+                                </VStack>
+                            </VStack>
+                        </form>
+                    </CardBody>
+                </Card>
+            </VStack>
+        </Container>
     );
 };
 
-export default register;
+export default Register;
