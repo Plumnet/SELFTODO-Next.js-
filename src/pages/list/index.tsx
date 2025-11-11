@@ -5,6 +5,7 @@ import { Box, Button, Text, Container, VStack, HStack, Heading, Card, CardBody, 
 import { collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
 import db, { auth } from '@/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { useRouter } from 'next/router';
 
 //コンポーネントを他のファイルから参照できるようにする
 export default function Home() {
@@ -20,6 +21,7 @@ export default function Home() {
     const [todos, setTodos] = useState<Todo[]>([]);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     async function red(docId: string) {
         try {
@@ -34,6 +36,11 @@ export default function Home() {
             alert("タスクの削除に失敗しました");
         }
     }
+
+    const handleLogout = () => {
+        auth.signOut();
+        router.push('/');
+    };
 
 
 
@@ -100,6 +107,7 @@ export default function Home() {
                     p={8}
                     borderRadius="xl"
                     boxShadow="lg"
+                    position="relative"
                 >
                     <Heading color="white" size="xl" mb={2}>
                         タスク一覧
@@ -109,6 +117,34 @@ export default function Home() {
                             ? `ようこそ、${currentUser.email || 'ユーザー'}さん`
                             : 'ゲストモードで表示しています'}
                     </Text>
+                    {currentUser ? (
+                        <Button
+                            position="absolute"
+                            top={4}
+                            right={4}
+                            colorScheme="whiteAlpha"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleLogout}
+                            _hover={{ bg: 'whiteAlpha.200' }}
+                        >
+                            ログアウト
+                        </Button>
+                    ) : (
+                        <Link href="/">
+                            <Button
+                                position="absolute"
+                                top={4}
+                                right={4}
+                                colorScheme="whiteAlpha"
+                                variant="outline"
+                                size="sm"
+                                _hover={{ bg: 'whiteAlpha.200' }}
+                            >
+                                TOPに戻る
+                            </Button>
+                        </Link>
+                    )}
                 </Box>
 
                 {/* 作成ボタン */}
